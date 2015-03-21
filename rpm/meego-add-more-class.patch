@@ -28,7 +28,7 @@ diff -uNr libzypp-bindings-0.5.9/swig/PoolQuery.i libzypp-bindings-0.5.9.new/swi
 +%extend  zypp::PoolQuery {
 +std::vector<zypp::PoolItem>  queryResults (zypp::ResPool pool)
 +{
-+#define for_(IT,BEG,END) for ( typeof(BEG) IT = BEG; IT != END; ++IT )
++#define for_(IT,BEG,END) for ( decltype(BEG) IT = BEG; IT != END; ++IT )
 +    std::vector<zypp::PoolItem> items;
 +    for_(it, self->begin(), self->end())
 +    {
