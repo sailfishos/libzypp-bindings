@@ -59,7 +59,7 @@ cmake -DCMAKE_INSTALL_PREFIX=%{prefix} \
 make -j1
 
 %install
-cd build
+cd libzypp-bindings/build
 make install DESTDIR=$RPM_BUILD_ROOT
 
 %clean
