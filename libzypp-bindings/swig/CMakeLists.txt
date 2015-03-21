@@ -1,0 +1,32 @@
+#
+# CMakeLists.txt for libzypp-bindings/swig
+#
+#
+
+ENABLE_TESTING()
+
+SET( SWIG_INPUT "${CMAKE_CURRENT_SOURCE_DIR}/zypp.i" )
+
+#
+# Let's see which target languages are available
+#
+
+FIND_PACKAGE(Ruby)
+# Enforce Python 2.7, libzypp-bindings does not yet work with Python3
+set(PythonLibs_FIND_VERSION 2.7)
+set(PythonLibs_FIND_VERSION_MAJOR 2)
+FIND_PACKAGE(PythonLibs)
+FIND_PACKAGE(Perl)
+
+
+IF (RUBY_LIBRARY AND RUBY_INCLUDE_PATH)
+  ADD_SUBDIRECTORY(ruby)
+ENDIF(RUBY_LIBRARY AND RUBY_INCLUDE_PATH)
+    
+IF (PYTHON_LIBRARY)
+  ADD_SUBDIRECTORY(python)
+ENDIF(PYTHON_LIBRARY)
+      
+IF (PERL_EXECUTABLE)
+  ADD_SUBDIRECTORY(perl5)
+ENDIF (PERL_EXECUTABLE)

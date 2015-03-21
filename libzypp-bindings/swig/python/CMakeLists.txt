@@ -1,0 +1,48 @@
+#
+# CMakeLists.txt for libzypp-bindings/swig/python
+#
+# !!Attn!!: This creates two files
+#  1. zypp.so
+#  2. zypp.py
+# and the .py file gets imported.
+#
+
+ENABLE_TESTING()
+ADD_SUBDIRECTORY(tests)
+
+# SWIG_OUPUT is per-target
+
+SET( SWIG_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/libzypp_python.cc" )
+
+FIND_PACKAGE(PythonInterp REQUIRED)
+IF (NOT PYTHON_SITEDIR)
+  EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c "from sys import stdout; from distutils import sysconfig; stdout.write(sysconfig.get_python_lib(1))" OUTPUT_VARIABLE PYTHON_SITEDIR)
+ENDIF (NOT PYTHON_SITEDIR)
+
+MESSAGE(STATUS "Python executable:   ${PYTHON_EXECUTABLE}")
+MESSAGE(STATUS "Python include path: ${PYTHON_INCLUDE_PATH}")
+MESSAGE(STATUS "Python site dir:     ${PYTHON_SITEDIR}")
+
+ADD_CUSTOM_COMMAND (
+   OUTPUT  ${SWIG_OUTPUT}
+   COMMAND ${CMAKE_COMMAND} -E echo_append "Creating wrapper code for python..."
+   COMMAND ${SWIG_EXECUTABLE} -v ${SWIG_DEFINITIONS} -c++ -python  -o ${SWIG_OUTPUT} -I${ZYPP_INCLUDE_DIR} ${SWIG_INPUT}
+   COMMAND ${CMAKE_COMMAND} -E echo "Done."
+   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../*.i ${CMAKE_CURRENT_SOURCE_DIR}/../*.h ${CMAKE_CURRENT_SOURCE_DIR}/*.i
+)
+
+ADD_LIBRARY( zypp_python SHARED ${SWIG_OUTPUT} )
+SET_TARGET_PROPERTIES( zypp_python
+  PROPERTIES
+    PREFIX ""
+    OUTPUT_NAME _zypp
+)
+
+INCLUDE_DIRECTORIES( ${PYTHON_INCLUDE_PATH} )
+INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/swig )
+INCLUDE_DIRECTORIES( ${ZYPP_INCLUDE_DIR} )
+TARGET_LINK_LIBRARIES( zypp_python ${ZYPP_LIBRARY} )
+
+INSTALL(TARGETS zypp_python LIBRARY DESTINATION ${PYTHON_SITEDIR})
+INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/zypp.py DESTINATION ${PYTHON_SITEDIR})

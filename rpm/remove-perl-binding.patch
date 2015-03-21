@@ -1,0 +1,303 @@
+diff --git a/swig/CMakeLists.txt b/swig/CMakeLists.txt
+index efa48c4..2a8b354 100644
+--- a/swig/CMakeLists.txt
++++ b/swig/CMakeLists.txt
+@@ -13,7 +13,6 @@ SET( SWIG_INPUT "${CMAKE_CURRENT_SOURCE_DIR}/zypp.i" )
+ 
+ FIND_PACKAGE(Ruby)
+ FIND_PACKAGE(PythonLibs)
+-FIND_PACKAGE(Perl)
+ 
+ 
+ IF (RUBY_LIBRARY AND RUBY_INCLUDE_PATH)
+@@ -23,7 +22,3 @@ ENDIF(RUBY_LIBRARY AND RUBY_INCLUDE_PATH)
+ IF (PYTHON_LIBRARY)
+   ADD_SUBDIRECTORY(python)
+ ENDIF(PYTHON_LIBRARY)
+-      
+-IF (PERL_EXECUTABLE)
+-  ADD_SUBDIRECTORY(perl5)
+-ENDIF (PERL_EXECUTABLE)
+diff --git a/swig/perl5/CMakeLists.txt b/swig/perl5/CMakeLists.txt
+deleted file mode 100644
+index df226a4..0000000
+--- a/swig/perl5/CMakeLists.txt
++++ /dev/null
+@@ -1,57 +0,0 @@
+-#
+-# CMakeLists.txt for libzypp-bindings/swig/perl5
+-#
+-# !!Attn!!: This creates two files
+-#  1. zypp.so
+-#  2. zypp.pm
+-# and the .pm file gets loaded.
+-#
+-
+-ENABLE_TESTING()
+-ADD_SUBDIRECTORY(tests)
+-
+-# SWIG_OUPUT is per-target
+-SET( SWIG_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/libzypp_perl.cc" )
+-
+-EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} -e "use Config; print \$Config{cppflags}" OUTPUT_VARIABLE PERL_CXXFLAGS)
+-EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} -e "use Config; print \$Config{archlib}.\"/CORE\"" OUTPUT_VARIABLE PERL_CORE_DIR)
+-EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} -e "use Config; print \$Config{installvendorarch}" OUTPUT_VARIABLE PERL_VENDOR_ARCH)
+-EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} -e "use Config; print \$Config{installvendorlib}" OUTPUT_VARIABLE PERL_VENDOR_LIB)
+-EXECUTE_PROCESS(COMMAND ${PERL_EXECUTABLE} -e "use Config; print \$Config{ccdlflags}" OUTPUT_VARIABLE PERL_LINK_FLAGS)
+-
+-MESSAGE(STATUS "Perl executable: ${PERL_EXECUTABLE}")
+-MESSAGE(STATUS "Perl core dir: ${PERL_CORE_DIR}")
+-MESSAGE(STATUS "Perl vendor arch dir: ${PERL_VENDORDIR}")
+-
+-ADD_DEFINITIONS( ${PERL_CXXFLAGS} -Wno-unused -Wno-error )
+-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PERL_CXXFLAGS}")
+-
+-LINK_DIRECTORIES( ${PERL_CORE_DIR} )
+-
+-if(COMMAND cmake_policy)
+-  cmake_policy(SET CMP0003 NEW)
+-endif(COMMAND cmake_policy)
+-
+-ADD_CUSTOM_COMMAND (
+-   OUTPUT  ${SWIG_OUTPUT}
+-   COMMAND ${CMAKE_COMMAND} -E echo_append "Creating wrapper code for perl..."
+-   COMMAND ${SWIG_EXECUTABLE} ${SWIG_DEFINITIONS} -c++ -perl5 -o ${SWIG_OUTPUT} -I${ZYPP_INCLUDE_DIR} ${SWIG_INPUT}
+-   COMMAND ${CMAKE_COMMAND} -E echo "Done."
+-   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+-   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../*.i ${CMAKE_CURRENT_SOURCE_DIR}/../*.h ${CMAKE_CURRENT_SOURCE_DIR}/*.i
+-)
+-
+-ADD_LIBRARY( zypp_perl SHARED ${SWIG_OUTPUT} )
+-SET_TARGET_PROPERTIES( zypp_perl
+-  PROPERTIES
+-    PREFIX ""
+-    OUTPUT_NAME zypp
+-)
+-
+-INCLUDE_DIRECTORIES( ${PERL_CORE_DIR} )
+-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/swig )
+-INCLUDE_DIRECTORIES( ${ZYPP_INCLUDE_DIR} )
+-TARGET_LINK_LIBRARIES( zypp_perl ${ZYPP_LIBRARY} )
+-
+-INSTALL(TARGETS zypp_perl LIBRARY DESTINATION ${PERL_VENDOR_ARCH})
+-INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/zypp.pm DESTINATION ${PERL_VENDOR_LIB})
+diff --git a/swig/perl5/perl.i b/swig/perl5/perl.i
+deleted file mode 100644
+index 8c60f30..0000000
+--- a/swig/perl5/perl.i
++++ /dev/null
+@@ -1,91 +0,0 @@
+-
+-%ignore zypp::Arch_empty;
+-
+-namespace zypp
+-{
+-    // These operators must be ignored otherwise the wrapper does
+-    // not compile (using swig 1.3.29).
+-    %ignore operator<<;
+-    %ignore operator==;
+-    %ignore operator!=;
+-
+-    namespace filesystem
+-    {
+-	// Same as above.
+-	%ignore operator==;
+-	%ignore operator!=;
+-	%ignore operator<<;
+-    }
+-}
+-
+-%define iter(cls, storetype)
+-%extend cls {
+-   cls::const_iterator iterator_incr(cls::const_iterator *it){
+-      (*it)++;
+-      return *it;
+-   }
+-   cls::const_iterator iterator_decr(cls::const_iterator *it){
+-      (*it)--;
+-      return *it;
+-   }
+-   bool iterator_equal(cls::const_iterator it1, cls::const_iterator it2) {
+-      return (it1 == it2);
+-   }
+-   storetype iterator_value(cls::const_iterator it) {
+-      return (&**it);
+-   }
+-   cls::const_iterator cBegin() {
+-      return self->begin();
+-   }
+-   cls::const_iterator cEnd() {
+-      return self->end();
+-   }
+-};
+-%enddef
+-
+-%define iter2(cls, storetype)
+-%extend cls {
+-   cls::const_iterator iterator_incr(cls::const_iterator *it){
+-      ++(*it);
+-      return *it;
+-   }
+-   cls::const_iterator iterator_decr(cls::const_iterator *it){
+-      --(*it);
+-      return *it;
+-   }
+-   bool iterator_equal(cls::const_iterator it1, cls::const_iterator it2) {
+-      return (it1 == it2);
+-   }
+-   storetype iterator_value(cls::const_iterator it) {
+-      return (*it);
+-   }
+-   cls::const_iterator cBegin() {
+-      return self->begin();
+-   }
+-   cls::const_iterator cEnd() {
+-      return self->end();
+-   }
+-};
+-%enddef
+-
+-// no operator--
+-%define forwarditer(cls, storetype)
+-%extend cls {
+-   cls::const_iterator iterator_incr(cls::const_iterator *it){
+-      ++(*it);
+-      return *it;
+-   }
+-   bool iterator_equal(cls::const_iterator it1, cls::const_iterator it2) {
+-      return (it1 == it2);
+-   }
+-   storetype iterator_value(cls::const_iterator it) {
+-      return (*it);
+-   }
+-   cls::const_iterator cBegin() {
+-      return self->begin();
+-   }
+-   cls::const_iterator cEnd() {
+-      return self->end();
+-   }
+-};
+-%enddef
+diff --git a/swig/perl5/tests/CMakeLists.txt b/swig/perl5/tests/CMakeLists.txt
+deleted file mode 100644
+index af6e7a7..0000000
+--- a/swig/perl5/tests/CMakeLists.txt
++++ /dev/null
+@@ -1,8 +0,0 @@
+-#
+-# CMakeLists.txt for libzypp-bindings/swig/perl5/tests
+-#
+-
+-ENABLE_TESTING()
+-
+-ADD_TEST(bindings_perl_loading perl ${CMAKE_CURRENT_SOURCE_DIR}/loading.pl)
+-ADD_TEST(bindings_perl_starting perl ${CMAKE_CURRENT_SOURCE_DIR}/starting.pl)
+diff --git a/swig/perl5/tests/loading.pl b/swig/perl5/tests/loading.pl
+deleted file mode 100644
+index 0f45c2d..0000000
+--- a/swig/perl5/tests/loading.pl
++++ /dev/null
+@@ -1,7 +0,0 @@
+-#!/usr/bin/perl
+-
+-use FindBin qw($Bin);
+-use lib "$Bin/../../../build/swig/perl5";
+-
+-use zypp;
+-
+diff --git a/swig/perl5/tests/starting.pl b/swig/perl5/tests/starting.pl
+deleted file mode 100644
+index 09d3954..0000000
+--- a/swig/perl5/tests/starting.pl
++++ /dev/null
+@@ -1,9 +0,0 @@
+-#!/usr/bin/perl
+-
+-use FindBin qw($Bin);
+-use lib "$Bin/../../../build/swig/perl5";
+-
+-use zypp;
+-
+-$zfactory = zyppc::ZYppFactory_instance();
+-$zypp = $zfactory->getZYpp;
+diff --git a/swig/zypp.i b/swig/zypp.i
+index 08d573b..5fcb42b 100644
+--- a/swig/zypp.i
++++ b/swig/zypp.i
+@@ -5,16 +5,6 @@
+  */
+ #define PRODUCTION 1
+ 
+-#ifdef SWIGPERL5
+-%{
+-   #undef NORMAL
+-   #undef readdir
+-   #undef Fflush
+-   #undef Mkdir
+-   #undef strerror
+-%}
+-#endif
+-
+ %{
+ /* Includes the header in the wrapper code */
+ #ifdef SWIGRUBY
+@@ -77,37 +67,6 @@
+ #include <rubyio.h>
+ #endif
+ 
+-#if defined(SWIGPERL)
+-#define TARGET_THREAD_BEGIN_BLOCK do {} while(0)
+-#define TARGET_THREAD_END_BLOCK do {} while(0)
+-#define TARGET_THREAD_BEGIN_ALLOW do {} while(0)
+-#define TARGET_THREAD_END_ALLOW do {} while(0)
+-
+-SWIGINTERNINLINE SV *SWIG_From_long  SWIG_PERL_DECL_ARGS_1(long value);
+-SWIGINTERNINLINE SV *SWIG_FromCharPtr(const char *cptr);
+-SWIGINTERNINLINE SV *SWIG_From_double  SWIG_PERL_DECL_ARGS_1(double value);
+-
+-#define Target_Null_p(x) (x == NULL)
+-#define Target_INCREF(x) 
+-#define Target_DECREF(x) 
+-#define Target_True (&PL_sv_yes)
+-#define Target_False (&PL_sv_no)
+-#define Target_Null NULL
+-#define Target_Type SV *
+-#define Target_Bool(x) (x)?Target_True:Target_False
+-#define Target_WChar(x) NULL
+-#define Target_Int(x) SWIG_From_long(x)
+-#define Target_String(x) SWIG_FromCharPtr(x)
+-#define Target_Real(x) SWIG_From_double(x)
+-#define Target_Array() (SV *)newAV()
+-#define Target_SizedArray(len) (SV *)newAV()
+-#define Target_Append(x,y) av_push(((AV *)(x)), y)
+-#define Target_DateTime(x) NULL
+-#include <perl.h>
+-#include <EXTERN.h>
+-#endif
+-
+-
+ #include <sstream>
+ #include "zypp/base/PtrTypes.h"
+ #include "zypp/base/ReferenceCounted.h"
+@@ -150,9 +109,6 @@ typedef std::list<std::string> StringList;
+ #if defined(SWIGPYTHON)
+ #define Target_Type PyObject*
+ #endif
+-#if defined(SWIGPERL)
+-#define Target_Type SV *
+-#endif
+ 
+ #ifdef SWIGRUBY
+ %include "ruby/std_list.i"
+@@ -166,11 +122,6 @@ typedef std::list<std::string> StringList;
+ %include "python/python.i"
+ #endif
+ 
+-#ifdef SWIGPERL5
+-%include "std_list.i"
+-%include "perl5/perl.i"
+-#endif
+-
+ #define VERSION ZYPP_VERSION
+ 
+ /* These include files are pending to be cleaned up from C++ cruft */

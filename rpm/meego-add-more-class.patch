@@ -1,0 +1,111 @@
+diff -uNr libzypp-bindings-0.5.9/swig/PoolQuery.i libzypp-bindings-0.5.9.new/swig/PoolQuery.i
+--- libzypp-bindings-0.5.9/swig/PoolQuery.i	1970-01-01 08:00:00.000000000 +0800
++++ libzypp-bindings-0.5.9.new/swig/PoolQuery.i	2011-10-24 10:42:35.275366767 +0800
+@@ -0,0 +1,39 @@
++%ignore zypp::PoolQuery::operator<<;
++%ignore zypp::detail::operator<<;
++%ignore zypp::dumpOn;
++%ignore zypp::detail::dumpOn;
++%ignore operator<<;
++%include <zypp/PoolQuery.h>
++%include "std_vector.i"
++namespace std {
++       %template(PoolItemVector) vector<zypp::PoolItem>;
++}
++namespace zypp
++{
++    namespace detail
++    {
++        %ignore operator<<;
++    }
++}
++%{
++#include <vector>
++using std::vector;
++%}
++
++#ifdef SWIGPYTHON
++%extend  zypp::PoolQuery {
++std::vector<zypp::PoolItem>  queryResults (zypp::ResPool pool)
++{
++#define for_(IT,BEG,END) for ( typeof(BEG) IT = BEG; IT != END; ++IT )
++    std::vector<zypp::PoolItem> items;
++    for_(it, self->begin(), self->end())
++    {
++        PoolItem pi(*it);
++        items.push_back(pi);
++    }
++
++    return items;
++}
++}
++#endif
++
+diff -uNr libzypp-bindings-0.5.9/swig/RepoManager.i libzypp-bindings-0.5.9.new/swig/RepoManager.i
+--- libzypp-bindings-0.5.9/swig/RepoManager.i	2011-03-01 20:32:06.000000000 +0800
++++ libzypp-bindings-0.5.9.new/swig/RepoManager.i	2011-10-24 11:24:25.288491255 +0800
+@@ -1 +1,18 @@
+ %include <zypp/RepoManager.h>
++
++#ifdef SWIGPYTHON
++%extend  zypp::RepoManager{
++    std::string loadSolvFile(std::string _solv, std::string _alias)
++    {
++        RepoInfo tmpRepo; 
++        tmpRepo.setAlias(_alias);
++        try {
++            sat::Pool::instance().addRepoSolv(_solv, tmpRepo);
++        } catch ( const Exception & e ){
++            return e.msg();
++        }
++
++        return std::string();
++    }
++}
++#endif
+diff -uNr libzypp-bindings-0.5.9/swig/RepoType.i libzypp-bindings-0.5.9.new/swig/RepoType.i
+--- libzypp-bindings-0.5.9/swig/RepoType.i	2011-10-24 10:42:10.490366408 +0800
++++ libzypp-bindings-0.5.9.new/swig/RepoType.i	2011-10-24 10:42:35.277366168 +0800
+@@ -1 +1,2 @@
+-%include <zypp/repo/RepoType.h>
+\ No newline at end of file
++%ignore zypp::operator<<;
++%include <zypp/repo/RepoType.h>
+diff -uNr libzypp-bindings-0.5.9/swig/SolvAttr.i libzypp-bindings-0.5.9.new/swig/SolvAttr.i
+--- libzypp-bindings-0.5.9/swig/SolvAttr.i	1970-01-01 08:00:00.000000000 +0800
++++ libzypp-bindings-0.5.9.new/swig/SolvAttr.i	2011-10-24 10:42:35.277366168 +0800
+@@ -0,0 +1,2 @@
++%ignore zypp::sat::SolvAttr::repositoryRevision;
++%include <zypp/sat/SolvAttr.h>
+diff -uNr libzypp-bindings-0.5.9/swig/zypp.i libzypp-bindings-0.5.9.new/swig/zypp.i
+--- libzypp-bindings-0.5.9/swig/zypp.i	2011-10-24 10:42:10.490366408 +0800
++++ libzypp-bindings-0.5.9.new/swig/zypp.i	2011-10-24 10:42:35.277366168 +0800
+@@ -90,6 +90,8 @@
+ #include "zypp/Resolver.h"
+ #include "zypp/pool/GetResolvablesToInsDel.h"
+ 
++#include "zypp/sat/SolvAttr.h"
++#include "zypp/PoolQuery.h"
+ #include "zypp/Product.h"
+ 
+ using namespace boost;
+@@ -175,6 +177,7 @@
+ %include "OnMediaLocation.i"
+ %include "Resolvable.i"
+ %include "RepoType.i"
++%include "TmpPath.i"
+ %include "RepoInfo.i"
+ %include "ServiceInfo.i"
+ %include "ResTraits.i"
+@@ -196,9 +199,10 @@
+ %include "ResPool.i"
+ %include "ZYppCommitPolicy.i"
+ %include "ZYppCommitResult.i"
+-%include "TmpPath.i"
+ %include "Resolver.i"
+ %include "ZConfig.i"
++%include "SolvAttr.i"
++%include "PoolQuery.i"
+ 
+ %ignore zypp::ZYpp::setTextLocale;
+ %ignore zypp::ZYpp::getTextLocale;
