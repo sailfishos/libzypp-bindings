@@ -22,6 +22,7 @@ License:        GPL v2 or later
 Summary:        Bindings for libzypp
 Group:          Development/Sources
 Source:         %{name}-%{version}.tar.gz
+Patch1:         disable-perl-bindings.patch
 Patch2:         support-armv7-architectures.patch
 Patch3:         Capabilities-iterator.patch
 Patch4:         meego-add-more-class.patch
@@ -36,6 +37,7 @@ This package provides bindings for libzypp, the library for package management.
 %prep
 %setup -q
 cd libzypp-bindings
+%patch1 -p1
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1

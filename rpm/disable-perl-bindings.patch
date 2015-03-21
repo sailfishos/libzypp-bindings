@@ -1,0 +1,11 @@
+--- upstream/swig/CMakeLists.txt	2015-03-21 08:06:55.533211670 +0100
++++ libzypp-bindings/swig/CMakeLists.txt	2015-03-21 09:56:26.310170432 +0100
+@@ -16,7 +16,7 @@
+ set(PythonLibs_FIND_VERSION 2.7)
+ set(PythonLibs_FIND_VERSION_MAJOR 2)
+ FIND_PACKAGE(PythonLibs)
+-FIND_PACKAGE(Perl)
++#FIND_PACKAGE(Perl)
+ 
+ 
+ IF (RUBY_LIBRARY AND RUBY_INCLUDE_PATH)
