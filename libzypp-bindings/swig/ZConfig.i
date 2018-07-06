@@ -1,2 +1,0 @@
-%include <zypp/ZConfig.h>
-

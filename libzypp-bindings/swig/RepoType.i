@@ -1,1 +1,0 @@
-%include <zypp/repo/RepoType.h>
