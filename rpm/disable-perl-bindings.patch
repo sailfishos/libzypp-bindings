@@ -1,11 +1,14 @@
 --- upstream/swig/CMakeLists.txt	2015-03-21 08:06:55.533211670 +0100
 +++ libzypp-bindings/swig/CMakeLists.txt	2015-03-21 09:56:26.310170432 +0100
-@@ -16,7 +16,7 @@
- set(PythonLibs_FIND_VERSION 2.7)
- set(PythonLibs_FIND_VERSION_MAJOR 2)
- FIND_PACKAGE(PythonLibs)
--FIND_PACKAGE(Perl)
-+#FIND_PACKAGE(Perl)
+@@ -11,9 +11,9 @@
+ # Allow to build only a subset of language bindings via options
+ #
  
+-OPTION(BUILD_RUBY_BINDINGS "Build Ruby bindings" ON)
++OPTION(BUILD_RUBY_BINDINGS "Build Ruby bindings" OFF)
+ OPTION(BUILD_PYTHON2_BINDINGS "Build Python 2 bindings" ON)
+-OPTION(BUILD_PERL5_BINDINGS "Build Perl 5 bindings" ON)
++OPTION(BUILD_PERL5_BINDINGS "Build Perl 5 bindings" OFF)
  
- IF (RUBY_LIBRARY AND RUBY_INCLUDE_PATH)
+ #
+ # Let's see which target languages are available

@@ -23,10 +23,6 @@ Summary:        Bindings for libzypp
 Group:          Development/Sources
 Source:         %{name}-%{version}.tar.gz
 Patch1:         disable-perl-bindings.patch
-Patch2:         support-armv7-architectures.patch
-Patch3:         Capabilities-iterator.patch
-Patch4:         meego-add-more-class.patch
-
 BuildRequires:  cmake gcc-c++ python-devel
 BuildRequires:  swig >= 1.3.40
 BuildRequires:  libzypp-devel
@@ -35,15 +31,11 @@ BuildRequires:  libzypp-devel
 This package provides bindings for libzypp, the library for package management.
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}/upstream
 cd libzypp-bindings
 %patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
 
 %build
-cd libzypp-bindings
 rm -rf build
 mkdir build
 cd build
@@ -59,7 +51,7 @@ cmake -DCMAKE_INSTALL_PREFIX=%{prefix} \
 make -j1
 
 %install
-cd libzypp-bindings/build
+cd build
 make install DESTDIR=$RPM_BUILD_ROOT
 
 %clean

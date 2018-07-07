@@ -1,3 +1,0 @@
-
-%include <zypp/MediaSetAccess.h>
-

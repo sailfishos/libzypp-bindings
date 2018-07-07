@@ -1,1 +1,0 @@
-%include <zypp/Url.h>
