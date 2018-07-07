@@ -16,7 +16,7 @@
 %endif
 
 Name:           libzypp-bindings
-Version:        0.6.4
+Version:        0.7.4
 Release:        1.3
 License:        GPL v2 or later
 Summary:        Bindings for libzypp
@@ -32,7 +32,6 @@ This package provides bindings for libzypp, the library for package management.
 
 %prep
 %setup -q -n %{name}-%{version}/upstream
-cd libzypp-bindings
 %patch1 -p1
 
 %build
