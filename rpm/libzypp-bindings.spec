@@ -22,8 +22,7 @@ License:        GPL v2 or later
 Summary:        Bindings for libzypp
 Group:          Development/Sources
 Source:         %{name}-%{version}.tar.gz
-Patch1:         disable-perl-bindings.patch
-Patch2:         meego-add-more-class.patch
+Patch1:         01-Include-Solvablei-before-RepoInfo-and-Reposit.patch
 BuildRequires:  cmake gcc-c++ python-devel
 BuildRequires:  swig >= 1.3.40
 BuildRequires:  libzypp-devel
@@ -34,7 +33,6 @@ This package provides bindings for libzypp, the library for package management.
 %prep
 %setup -q -n %{name}-%{version}/upstream
 %patch1 -p1
-%patch2 -p1
 
 %build
 rm -rf build
@@ -48,8 +46,15 @@ cmake -DCMAKE_INSTALL_PREFIX=%{prefix} \
       -DCMAKE_CXX_FLAGS_RELEASE:STRING="%{optflags}" \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_SKIP_RPATH=1 \
+      -DBUILD_PERL5_BINDINGS=OFF \
+      -DBUILD_RUBY_BINDINGS=OFF \
       ..
+
 make -j1
+
+%check
+cd build
+make test
 
 %install
 cd build
