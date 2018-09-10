@@ -1,0 +1,21 @@
+From ab4941e2c23da8aeb2bd2953d10d7b0cfab7fa16 Sun, 9 Sep 2018 16:13:05 +0200
+From: Andrew Branson <andrew.branson@jollamobile.com>
+Date: Sun, 9 Sep 2018 16:11:55 +0200
+Subject: [PATCH] [python] Include Solvable.i before RepoInfo and Repository, as they are used there
+
+diff --git a/swig/zypp.i b/swig/zypp.i
+index 1b3b26f..cd9327e 100644
+--- a/swig/zypp.i
++++ b/swig/zypp.i
+@@ -243,10 +243,10 @@
+ %include "CapMatch.i"
+ %include "OnMediaLocation.i"
+ %include "SolvAttr.i"
+-%include "Resolvable.i"
+ %include "RepoType.i"
+ %include "RepoInfo.i"
+ %include "Repository.i"
++%include "Resolvable.i"
+ %include "ServiceInfo.i"
+ %include "ResTraits.i"
+ %include "ResStatus.i"
