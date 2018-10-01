@@ -22,7 +22,6 @@ License:        GPL v2 or later
 Summary:        Bindings for libzypp
 Group:          Development/Sources
 Source:         %{name}-%{version}.tar.gz
-Patch1:         01-Include-Solvablei-before-RepoInfo-and-Reposit.patch
 BuildRequires:  cmake gcc-c++ python-devel
 BuildRequires:  swig >= 1.3.40
 BuildRequires:  libzypp-devel
@@ -32,7 +31,6 @@ This package provides bindings for libzypp, the library for package management.
 
 %prep
 %setup -q -n %{name}-%{version}/upstream
-%patch1 -p1
 
 %build
 rm -rf build
